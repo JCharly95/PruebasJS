@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Chart.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="js/randomRGB.js"></script>
+</head>
+<body>
+    <canvas id="myChart" width="400" height="400"></canvas>
+</body>
+<script>
+    // Preprocesamiento de datos para entregarselos a Chart.js
+    let datos = [10,9,8,25];
+    let titulos = [];
+    let colores = [];
+
+    titulos = datos.map((actElem, index) => {
+        return 'Col'+index;
+    });
+
+    colores = datos.map(function color(){
+        return randColorRGB()
+    });
+
+    /*for(let cont=0; cont<datos.length; cont++){
+        // Nombre para cada muestra de datos
+        titulos.push('col'+cont+',');
+        // Obtencion del color para dicha muestra
+        colores.push(randColorRGB());
+    }*/
+
+    console.log(titulos);
+    console.log(colores);
+
+    let areaTrab = document.getElementById("myChart").getContext("2d");
+    let grafica = new Chart(areaTrab,{
+        type: 'bar',
+        data: {
+            labels: titulos,
+            datasets:[{
+                label: 'Cantidad de elementos',
+                data: datos,
+                backgroundColor: colores
+            }]
+        },
+        options: {
+            plugins:{
+                title:{
+                    display: true, 
+                    text: 'Grafica de prueba'
+                }},
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks:{
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+</html>
