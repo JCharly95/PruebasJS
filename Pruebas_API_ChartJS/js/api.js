@@ -84,6 +84,9 @@ const consult = fetch(`${API_URL}/todos`, opts)
         // Grafica de la informacion
         grafica([aprob], ['Aprobados'], "#canvas1");
         grafica([nAprob], ['No Aprobados'], "#canvas2");
+
+        // Grafica conjunta de la informacion
+        grafica(datos, etiquetas, '#canvas3');
     });
 
 // Otra pagina de api descubierta la hacer investigacion es rapidapi
