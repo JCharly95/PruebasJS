@@ -1,5 +1,5 @@
 {
-  "name": "pruebasbms",
+  "name": "pruebas_react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,15 +7,12 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "apexcharts": "^3.36.3",
-    "axios": "^1.2.0",
-    "feather-icons": "^4.29.0",
+    "axios": "^1.2.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.0",
     "react-dom": "^18.2.0",
-    "react-feather": "^2.0.10",
     "react-flatpickr": "^3.10.13",
     "react-scripts": "5.0.1",
-    "reactstrap": "^9.1.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
