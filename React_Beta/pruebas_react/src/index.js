@@ -1,19 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
+import './BasicApp/index.css';
+//import reportWebVitals from './BasicApp/reportWebVitals';
+/*import App from './BasicApp';
 import AGet from './Axios_GET/App_Axios_GET'
 import AGetBMS from './Axios_GET/App_Axios_Get_BMS'
 import APost from './Axios_POST/App_Axios_POST'
 import ApChart from './ApexCharts/App_ApexCharts'
 import APut from './Axios_PUT/App_Axios_PUT'
 import ADel from './Axios_DELETE/App_Axios_DEL'
+import AGet from './Axios_GET/App_Axios_GET'
+import AGet2 from './Axios_GET/App_Axios_GET_V2'
 import Flpck from './Flatpickr/App_Flatpickr'
-import reportWebVitals from './reportWebVitals';
+import ApChBMS from './ApexCharts/ApexCharts_BMS'
+import ApChBMS2 from './ApexCharts/ApexCharts_BMS_V2'*/
+import Bomba from './EjemploPract/BombLine'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+  {/* 
     <App />
     <br />
     <AGet />
@@ -28,12 +34,16 @@ root.render(
     <br />
     <ADel />
     <br />
-    <Flpck />
+    <hr />
     <br />
+    <ApChBMS />
+    <Flpck />
+  */}
+  <Bomba />
   </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+//reportWebVitals();

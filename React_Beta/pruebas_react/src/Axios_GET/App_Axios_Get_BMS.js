@@ -2,6 +2,7 @@ import axios from "axios";
 import React from "react";
 
 const baseURL = "https://bms.controldigital.mx/data2.php";
+//const baseURL = "data.json";
 
 export default function Axios_GET_BMS() {
   const [metadata, setMetadata] = React.useState([1])
