@@ -17,7 +17,7 @@ export default function BombLine_BMS (){
     const [fechIni, setFechIni] = useState(Date.now());
     const [fechFin, setFechFin] = useState(Date.now());
     // Establecer la variable de busqueda de datos (el filtro que se usara con la lista desplegable)
-    const [tipInfoBus, setTipInfoBus] = useState("/niagaratest/L3$20$2d$20L1");
+    const [tipInfoBus, setTipInfoBus] = useState("404");
     // Los registros suelen estar desde el 15 de marzo hasta el 14 de julio
 //-------------------------------------------------------------------------------------------------------------
 //-------------------------Peticion con Axios para obtener la informacion--------------------------------------
@@ -38,13 +38,15 @@ export default function BombLine_BMS (){
     const regsBusqueda = [];
     metadata.map(
         (info) => (
-            (`${info.HISTORY_ID}`.includes(tipInfoBus.split(";")[0])) ? regsBusqueda.push(
-                {
-                    ID: parseInt(`${info.ID}`),
-                    DATE: (new Date(parseInt(`${info.TIMESTAMP}`))),
-                    VALUE: parseFloat(parseFloat(`${info.VALUE}`).toFixed(2))
-                }
-            ) : null
+            (tipInfoBus.split(";")[0]!=="404") ?
+                (`${info.HISTORY_ID}`.includes(tipInfoBus.split(";")[0])) ? regsBusqueda.push(
+                    {
+                        ID: parseInt(`${info.ID}`),
+                        DATE: (new Date(parseInt(`${info.TIMESTAMP}`))),
+                        VALUE: parseFloat(parseFloat(`${info.VALUE}`).toFixed(2))
+                    }
+                ) : null
+            : null
         )
     );
 //-------------------------------------Preparacion de Flatpickr------------------------------------------------
@@ -59,7 +61,6 @@ export default function BombLine_BMS (){
         onClose: function(selectedDates, dateSel) {
             fechIngreIni=new Date(dateSel);
             setFechIni(fechIngreIni);
-            console.log("Fecha de Inicio Seleccionada:", fechIngreIni);
         }
     };
     const optionsFinal = {
@@ -71,8 +72,6 @@ export default function BombLine_BMS (){
         onClose: function(selectedDates, dateSel) {
             fechIngreFin=new Date(dateSel);
             setFechFin(fechIngreFin);
-            console.log("Fecha de Fin Seleccionada:", fechIngreFin);
-            console.log("Arreglo de informacion para la grafica", info);
         }
     };
 //-------------------------------------------------------------------------------------------------------------
@@ -85,6 +84,9 @@ export default function BombLine_BMS (){
 
         regsBusqueda.map(function(registro) {
             const fecha = registro.DATE, valor = registro.VALUE;
+            // Si se realizo la limpieza de seleccion de rangos de fechas no se tendran valores, por lo cual solo se retornara la funcion
+            if(fechIni==="" || fechFin==="" || (fechIni==="" && fechFin===""))
+                return null;
             /* Ya que el promedio depende del resultado de la consulta solo en este punto se puede hacer el filtrado de datos junto con el parametro del promedio.
             Entonces si la fecha se comprende entre la inicial y la final, ademas de ser mayor al promedio (para que no haya tantos registros) se incoporara el registro al arreglo de valores para la grafica*/
             if(fecha > fechIni && fecha < fechFin && valor > promedio)
@@ -132,7 +134,7 @@ export default function BombLine_BMS (){
             },
         },
         noData: {
-            text: 'Informacion no disponible, cargando...'
+            text: 'Informacion no disponible'
         }
     };
 //---Ejemplos de mapeo inicial con el arreglo de valores traidos con axios y creacion de arreglo de datos para la grafica---
@@ -145,7 +147,54 @@ export default function BombLine_BMS (){
         [new Date(`${reg.TIMESTAMP}`.substring(0, `${reg.TIMESTAMP}`.length - 3) * 1000), parseFloat(`${reg.VALUE}`).toFixed(2)]
     ));*/
 //-------------------------------------------------------------------------------------------------------------
-//------------------Obtencion del valor de filtro de datos seleccionado por parte del usuario------------------
+//----------------------Preparacion del filtro de busqueda de informacion para el usuario----------------------
+    const listaFil = [
+        {
+            nombre: "Bateria",
+            valor: "/niagaratest/Engine$20Battery"
+        },
+        {
+            nombre: "Combustible",
+            valor: "/niagaratest/Fuel$20Level"
+        },
+        {
+            nombre: "Linea de Energia 1",
+            valor: "/niagaratest/L3$20$2d$20L1"
+        },
+        {
+            nombre: "Linea de Energia 2",
+            valor: "/niagaratest/L1$20$2d$20N"
+        },
+        {
+            nombre: "Linea de Energia 3",
+            valor: "/niagaratest/L1$20$2d$20L2"
+        },
+        {
+            nombre: "Linea de Energia 4",
+            valor: "/niagaratest/L2$20$2d$20L3"
+        },
+        {
+            nombre: "Linea de Energia 5",
+            valor: "/niagaratest/L3$20$2dN"
+        },
+        {
+            nombre: "Cantidad de Incendios",
+            valor: "/niagaratest/mmH2O$20Contra$20Incendio1"
+        },
+        {
+            nombre: "Nivel de Drenaje",
+            valor: "/niagaratest/mmH2O$20Pluvial1"
+        },
+        {
+            nombre: "Nivel de Agua",
+            valor: "/niagaratest/mmH2O$20Potable1"
+        },
+        {
+            nombre: "Nivel de Piso",
+            valor: "/niagaratest/Number$20of$20Starts"
+        }
+    ];
+    
     const solFilBus = (filBus) => {
         setTipInfoBus(filBus);
     }
@@ -181,7 +230,7 @@ export default function BombLine_BMS (){
 //-------------------------------------------------------------------------------------------------------------
     return (
         <div>
-            <div className='container border mt-3'>
+            <div className='container-fluid border mt-3'>
                 <div className='row align-items-center border pt-3 pb-3'>
                     <div className='col-md-3'>
                         <div className='row align-items-center'>
@@ -190,10 +239,7 @@ export default function BombLine_BMS (){
                             </div>
                             <div className='col-md-auto'>
                                 <div className='row align-items-center mb-2'>
-                                    <SelFilBus solFilBus={solFilBus}/>
-                                </div>
-                                <div className='row align-items-center'>
-                                    <input type="text" className="form-control" value={tipInfoBus.split(";")[1]} placeholder="Usted selecciono..." readOnly />
+                                    <SelFilBus solFilBus={solFilBus} elemSel={listaFil}/>
                                 </div>
                             </div>
                         </div>
@@ -205,30 +251,44 @@ export default function BombLine_BMS (){
                                 <Clock size={30} />
                             </div>
                             <div className='col-md-auto'>
-                                <p>Seleccionar Fecha y Hora de Inicio:</p>
-                                <Flatpickr ref={fechIniSel} options={optionsInicial} />
-                                <button className='btn btn-danger' type="button" onClick={() => {
-                                    if (!fechIniSel?.current?.flatpickr) return;
-                                        fechIniSel.current.flatpickr.clear();
-                                    }
-                                }>
-                                    Limpiar Seleccion
-                                </button>
+                                <div className='row align-items-center mb-2'>
+                                    <span>Seleccionar Fecha y Hora de Inicio:</span>
+                                </div>
+                                <div className='row align-items-center mb-2'>
+                                    <Flatpickr ref={fechIniSel} options={optionsInicial} />
+                                </div>
+                                <div className='row align-items-center mb-2'>
+                                    <button className='btn btn-danger' type="button" onClick={() => {
+                                        if (!fechIniSel?.current?.flatpickr) return;
+                                            fechIniSel.current.flatpickr.clear();
+                                            setFechIni("");
+                                        }
+                                    }>
+                                        Limpiar Seleccion
+                                    </button>
+                                </div>
                             </div>
                             <div className='col-md-auto'>
                                 <Calendar size={30} />
                                 <Clock size={30} />
                             </div>
                             <div className='col-md-auto'>
-                                <p>Seleccionar Fecha y Hora de Fin:</p>
-                                <Flatpickr ref={fechFinSel} options={optionsFinal} />
-                                <button className='btn btn-danger' type="button" onClick={() => {
-                                    if (!fechFinSel?.current?.flatpickr) return;
-                                        fechFinSel.current.flatpickr.clear();
-                                    }
-                                }>
-                                    Limpiar Seleccion
-                                </button>
+                                <div className='row align-items-center mb-2'>
+                                    <span>Seleccionar Fecha y Hora de Fin:</span>
+                                </div>
+                                <div className='row align-items-center mb-2'>
+                                    <Flatpickr ref={fechFinSel} options={optionsFinal} />
+                                </div>
+                                <div className='row align-items-center mb-2'>
+                                    <button className='btn btn-danger' type="button" onClick={() => {
+                                        if (!fechFinSel?.current?.flatpickr) return;
+                                            fechFinSel.current.flatpickr.clear();
+                                            setFechFin("");
+                                        }
+                                    }>
+                                        Limpiar Seleccion
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
