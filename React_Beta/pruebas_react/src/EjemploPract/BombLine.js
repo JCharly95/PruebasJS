@@ -2,38 +2,23 @@
 import axios from 'axios';
 import Chart from 'react-apexcharts';
 import Flatpickr from 'react-flatpickr';
-import "flatpickr/dist/themes/material_blue.css";
+import "flatpickr/dist/themes/light.css";
+import SelFilBus from './dropdown_menu/menu'
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Search, Calendar, Clock } from 'react-feather'
 import React, { useEffect, useState, useRef } from 'react';
-
-// Metodo burbuja para el ordenamiento de datos de la grafica
-/*function burbuja(arrInfo) {
-    let contInte, contExte, aux;
-    const n = arrInfo.length;
-  
-    // Algoritmo de burbuja
-    for (contExte = 1; contExte < n; contExte++) {
-      for (contInte = 0; contInte < (n - contExte); contInte++) {
-        if (arrInfo[contInte][0] > arrInfo[contInte + 1][0]) {
-            aux = arrInfo[contInte];
-            arrInfo[contInte] = arrInfo[contInte + 1];
-            arrInfo[contInte + 1] = aux;
-        }
-      }
-    }
-  }*/
 
 export default function BombLine_BMS (){
     const arrVals = [], info = [];
 //------------------------------Estableciendo las variables de trabajo-----------------------------------------
     // Variable de estado para la obtencion de registros
     const [metadata, setMetadata] = useState([1]);
-
     // Establecer las variables de las fechas
     const [fechIni, setFechIni] = useState(Date.now());
     const [fechFin, setFechFin] = useState(Date.now());
-    // Aqui se ingresara que tipo de registros se desea buscar
-    let infoBus = "/niagaratest/L3$20$2d$20L1";
-    // Para este ejemplo la muestra contempla registros desde el 15 de marzo a las 2:09 pm hasta el 14 de julio a las 4:48 pm
+    // Establecer la variable de busqueda de datos (el filtro que se usara con la lista desplegable)
+    const [tipInfoBus, setTipInfoBus] = useState("/niagaratest/L3$20$2d$20L1");
+    // Los registros suelen estar desde el 15 de marzo hasta el 14 de julio
 //-------------------------------------------------------------------------------------------------------------
 //-------------------------Peticion con Axios para obtener la informacion--------------------------------------
     useEffect(() => {
@@ -44,6 +29,7 @@ export default function BombLine_BMS (){
         }
         obteInfo(setMetadata);
     }, []);
+    
     if (!metadata)
         console.log("Ocurrio un problema en la obtencion de la informacion");
 //-------------------------------------------------------------------------------------------------------------
@@ -52,7 +38,7 @@ export default function BombLine_BMS (){
     const regsBusqueda = [];
     metadata.map(
         (info) => (
-            (`${info.HISTORY_ID}`.includes(infoBus)) ? regsBusqueda.push(
+            (`${info.HISTORY_ID}`.includes(tipInfoBus.split(";")[0])) ? regsBusqueda.push(
                 {
                     ID: parseInt(`${info.ID}`),
                     DATE: (new Date(parseInt(`${info.TIMESTAMP}`))),
@@ -108,45 +94,16 @@ export default function BombLine_BMS (){
         });
     }
 //-------------------------------------------------------------------------------------------------------------
-//------------------------------Preparacion de valores para la grafica-----------------------------------------
-    /*const info = metadata.map(
-        function(registro) {
-            // Filtro del nombre del registro para la grafica
-            const regID = `${registro.HISTORY_ID}`.includes(infoBus);
-            // Fecha UNIX del registro (timestamp)
-            const fechReg = new Date(`${registro.TIMESTAMP}`.substring(0, `${registro.TIMESTAMP}`.length - 3) * 1000)
-            const valReg = parseFloat(`${registro.VALUE}`).toFixed(2)
-            
-            // Si el nombre del registro coincidio con el de la busqueda, el valor de este es mayor al promedio y se encuentra en rango con la fecha, se agrega como dato al arreglo de valores de la grafica
-            if (regID && (valReg > promedio) && (fechReg > fechIni) && (fechReg < fechFin)) 
-                return [fechReg, valReg]
-
-            return 0
-        }
-    );*/
-//-------------------------------------------------------------------------------------------------------------
-    // Ordenamiento de datos
-    //burbuja(info)
-
-    /*const info = metadata.map((reg, index) => (
-        (index < 10) ? [new Date(`${reg.TIMESTAMP}`.substring(0, `${reg.TIMESTAMP}`.length - 3) * 1000), parseFloat(`${reg.VALUE}`).toFixed(2)] : 0
-    ));*/
-
-    // Pasando todos los valores
-    /*const info = metadata.map((reg) => (
-        [new Date(`${reg.TIMESTAMP}`.substring(0, `${reg.TIMESTAMP}`.length - 3) * 1000), parseFloat(`${reg.VALUE}`).toFixed(2)]
-    ));*/
-    
+//-------------------------Preparacion de las opciones de configuracion para la grafica------------------------
     const dataSeries = [
         {
-            name: "Registros BMS",
+            name: `Registros ${tipInfoBus.split(";")[1]}`,
             data: info
         }
     ];
 
     const options = {
         chart: {
-            height: "70%",
             type: "line",
             animations: {
                 initialAnimation: {
@@ -162,49 +119,123 @@ export default function BombLine_BMS (){
         },
         yaxis: {
             labels: {
-              offsetX: 24,
-              offsetY: -5
+                offsetX: 24,
+                offsetY: -5
             },
             tooltip: {
-              enabled: true
+                enabled: true
             }
         },
         tooltip: {
             x: {
-              format: "dd MMM yyyy; HH:ss"
+                format: "dd MMM yyyy; HH:ss"
             },
         },
         noData: {
-            text: 'Informacion no disponible, seleccione un rango valido'
+            text: 'Informacion no disponible, cargando...'
         }
     };
+//---Ejemplos de mapeo inicial con el arreglo de valores traidos con axios y creacion de arreglo de datos para la grafica---
+    /*const info = metadata.map((reg, index) => (
+        (index < 10) ? [new Date(`${reg.TIMESTAMP}`.substring(0, `${reg.TIMESTAMP}`.length - 3) * 1000), parseFloat(`${reg.VALUE}`).toFixed(2)] : 0
+    ));*/
 
+    // Pasando todos los valores
+    /*const info = metadata.map((reg) => (
+        [new Date(`${reg.TIMESTAMP}`.substring(0, `${reg.TIMESTAMP}`.length - 3) * 1000), parseFloat(`${reg.VALUE}`).toFixed(2)]
+    ));*/
+//-------------------------------------------------------------------------------------------------------------
+//------------------Obtencion del valor de filtro de datos seleccionado por parte del usuario------------------
+    const solFilBus = (filBus) => {
+        setTipInfoBus(filBus);
+    }
+
+    /* Explicacion rapida para pasar valores entre componentes react (hijo a padre)
+        Primero se crea una funcion vacia en el componente padre y una variable de estado (useState) vacia o con un valor por defecto.
+        La funcion puede ser como la funcion flecha previa a esta explicacion o como el siguiente ejemplo:
+            const [datos, estableceDatos] = useState('');
+            const hijoAPadre = () => {
+            
+            }
+        Luego se pasa esta funcion como propiedad a la invocacion al componente hijo como esta en SelFilBus debajo. 
+            <Hijo hijoAPadre={hijoAPadre}/>
+        Nota: La propiedad puede tener el nombre que sea, para fines practicos en esta ocasion se dejo el nombre de la funcion.
+            <SelFilBus solFilBus={solFilBus}/>
+        Despues en el componente hijo se acepta la llamada a la funcion como propiedad (parametro si se usa function), como es para este caso
+            function menuDropdown({ solFilBus }) {
+                ...
+            }
+        Y dentro del hijo se crea algun elemento que genere un evento donde se pueda invocar la funcion del componente padre; para este caso
+        se hicieron botones de la lista desplegable
+            <DropdownItem onClick={()=>solFilBus("/niagaratest/Engine$20Battery")}>Bateria</DropdownItem>
+        Donde en el evento onClick, se invoca una arrowFunction para llamar al metodo solFilBus del componente padre y se "retorna" con
+        el valor modificado.
+        Finalmente, en la funcion vacia del componente padre se aceptan los datos procesados como parametro y se establece el estado creado,
+        por ejemplo:
+            const hijoAPadre = (datoshijo) => {
+                estableceDatos(datoshijo);
+            }
+        O como quedo al final el metodo solFilBus previo a esta explicacion.
+        Finalmente para ver si es efectivo este elemento, se imprime el valor del estado en el componente padre usando el estado entre llaves.
+        Por ejemplo: el resultado del ejemplo teorico seria { datos }, ya que asi se nombro el useState inicial. */
+//-------------------------------------------------------------------------------------------------------------
     return (
         <div>
-            <div id="CalenGrafSel">
-                <p>
-                    &nbsp; Seleccionar Fecha de inicio: &nbsp;
-                    <Flatpickr ref={fechIniSel} options={optionsInicial} />
-                    <button type="button" onClick={() => {
-                        if (!fechIniSel?.current?.flatpickr) return;
-                            fechIniSel.current.flatpickr.clear();
-                        }
-                    }>
-                    Limpiar Seleccion
-                    </button>
-                    &nbsp; Seleccionar Fecha de fin: &nbsp;
-                    <Flatpickr ref={fechFinSel} options={optionsFinal} />
-                    <button type="button" onClick={() => {
-                        if (!fechFinSel?.current?.flatpickr) return;
-                            fechFinSel.current.flatpickr.clear();
-                        }
-                    }>
-                    Limpiar Seleccion
-                    </button>
-                </p>
-            </div>
-            <div id="chart">
-                <Chart options={options} series={dataSeries} type="line" />
+            <div className='container border mt-3'>
+                <div className='row align-items-center border pt-3 pb-3'>
+                    <div className='col-md-3'>
+                        <div className='row align-items-center'>
+                            <div className='col-md-auto'>
+                                <Search size={30} />
+                            </div>
+                            <div className='col-md-auto'>
+                                <div className='row align-items-center mb-2'>
+                                    <SelFilBus solFilBus={solFilBus}/>
+                                </div>
+                                <div className='row align-items-center'>
+                                    <input type="text" className="form-control" value={tipInfoBus.split(";")[1]} placeholder="Usted selecciono..." readOnly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='col-md-auto'>
+                        <div className='row align-items-center'>
+                            <div className='col-md-auto'>
+                                <Calendar size={30} />
+                                <Clock size={30} />
+                            </div>
+                            <div className='col-md-auto'>
+                                <p>Seleccionar Fecha y Hora de Inicio:</p>
+                                <Flatpickr ref={fechIniSel} options={optionsInicial} />
+                                <button className='btn btn-danger' type="button" onClick={() => {
+                                    if (!fechIniSel?.current?.flatpickr) return;
+                                        fechIniSel.current.flatpickr.clear();
+                                    }
+                                }>
+                                    Limpiar Seleccion
+                                </button>
+                            </div>
+                            <div className='col-md-auto'>
+                                <Calendar size={30} />
+                                <Clock size={30} />
+                            </div>
+                            <div className='col-md-auto'>
+                                <p>Seleccionar Fecha y Hora de Fin:</p>
+                                <Flatpickr ref={fechFinSel} options={optionsFinal} />
+                                <button className='btn btn-danger' type="button" onClick={() => {
+                                    if (!fechFinSel?.current?.flatpickr) return;
+                                        fechFinSel.current.flatpickr.clear();
+                                    }
+                                }>
+                                    Limpiar Seleccion
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className='row align-items-center border pt-3 pb-3'>
+                    <Chart options={options} series={dataSeries} type="line" />
+                </div>
             </div>
         </div>
     );

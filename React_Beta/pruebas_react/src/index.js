@@ -13,8 +13,10 @@ import AGet from './Axios_GET/App_Axios_GET'
 import AGet2 from './Axios_GET/App_Axios_GET_V2'
 import Flpck from './Flatpickr/App_Flatpickr'
 import ApChBMS from './ApexCharts/ApexCharts_BMS'
+import Dropdown from "./EjemploPract/dropdown_menu/menu";
 import ApChBMS2 from './ApexCharts/ApexCharts_BMS_V2'*/
 import Bomba from './EjemploPract/BombLine'
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -38,6 +40,7 @@ root.render(
     <br />
     <ApChBMS />
     <Flpck />
+  <Dropdown />
   */}
   <Bomba />
   </React.StrictMode>
